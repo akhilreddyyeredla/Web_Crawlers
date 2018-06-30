@@ -1,0 +1,552 @@
+import json
+import uuid
+from datetime import date
+from datetime import datetime
+import re
+
+import DataCollectors_Configuration
+import CONSTANTS
+
+
+WRITE_TO_CASSANDRA = CONSTANTS.WRITE_TO_CASSANDRA
+
+
+def ProductSKU(page_soup):
+    return "NA"
+
+
+def ProductDate():
+    today = date.today()
+    return str(today)
+
+
+def ProductTime():
+    t = datetime.time(datetime.now())
+    return str(t)
+
+
+def Name(name):
+    name = name.split("|")
+    concat = ""
+    for i in range(0, 11):
+        if i < len(name):
+            concat = concat + ',{}'.format(name[i])
+        else:
+            concat = concat + ",Not_Applicable"
+    # print(concat)
+    return str(concat).split(',')
+
+
+def ProductCondition(page_soup):
+    try:
+        # my_dic={}
+        condition = page_soup.find('dd', {'class': 'unit-condition'}).text.strip()
+        if condition:
+            # my_dic['Condition']=condition
+            # Condition = json.dumps(my_dic)
+            # # print(Condition)
+            return re.sub('[^a-zA-Z0-9 .]', '', condition)
+        else:
+            return "not_available"
+    except:
+        return "not_available"
+
+
+def ProductSavedPrice(page_soup):
+    try:
+        saved_price = page_soup.find('span', {'class': 'noWrap'}).text.strip()
+        if saved_price:
+            # print("Saved_price: " + saved_price)
+            return str(saved_price.replace("AED", ""))
+        else:
+            return "not_available"
+    except:
+        return "not_available"
+
+
+def ProductAddedDate(page_soup):
+    return "NA"
+
+
+def ProductAdditionalPolicies(page_soup):
+    return "NA"
+
+
+def ProductAvailability(page_soup):
+    try:
+    	availability = page_soup.find('b', {'class': 'txtcolor-alert xleft'}).text.strip().replace(",", "-")
+    	if availability:
+        	Product_Availability = availability
+        	return str(Product_Availability)
+    	else:
+        	return "not_available"
+    except:
+	return "not_available"
+
+def ProductBrand(page_soup):
+    brand = page_soup.find('div', {'class': 'small-12 columns product-title'})
+    if brand:
+        brand_name = brand.find('a').text
+        # print(brand_name)
+        return re.sub(('[^a-zA-Z0-9 .]'), '', brand_name)
+    else:
+        return "not_available"
+
+
+def ProductDescription(page_soup):
+    my_dic = {}
+    desc = page_soup.find_all('div', {'class': 'item-details-mini clearfix'})
+    for desct in desc:
+        description = desct.find_all('li')
+        description_paras = desct.findAll('p')
+        if description and len(description_paras) !=0:
+            li = []
+            for iterate in description:
+                description_list = iterate.text.strip().replace(',', '').replace("$", "")
+                # print(description_list)
+                li.append(description_list)
+            for description_para in description_paras:
+                display = description_para.text.strip().replace(',', '').replace("$", "")
+                # print(display)
+                li.append(display)
+            my_dic["Description"] = li
+        elif description:
+            for iterate in description:
+                description_list = iterate.text.strip().replace(',', '').replace("$", "")
+                # print(description_list)
+                my_dic["Description"] = description_list
+        elif len(description_paras) !=0:
+            li = []
+            for description_para in description_paras:
+                display = description_para.text.strip().replace(',', '').replace("$", "")
+                # print(display)
+                li.append(display)
+            my_dic["Description"] = li
+
+    final_description = json.dumps(my_dic).replace(",", "_")
+    return final_description
+
+
+def ProductDiscountPercentage(page_soup):
+    try:
+        discount_percent = page_soup.find('span', {'class': 'discount'}).text.strip().replace(",", "-")
+        if discount_percent:
+            # print("Discount_percent: " + discount_percent)
+            return str(discount_percent)
+        else:
+            return "not_available"
+    except:
+        return "not_available"
+
+
+def ProductSellingPrice(page_soup):
+    selling_price = page_soup.find('h3', {'class': 'price is sk-clr1'})
+    if selling_price:
+        price = selling_price.text.strip()
+        # print("Rate: " + selling_price)
+        return price.replace("AED", "").replace(',', '')
+    else:
+        return "not_available"
+
+
+def ProductEAN(page_soup):
+    container1 = page_soup.find_all('div', {'id': 'specs-full'})
+    if container1:
+        for num in container1:
+            spe = num.find_all('dl', {'class': 'stats'})
+            for specfi in spe:
+                names = specfi.find_all('dt')
+                Specication = specfi.find_all('dd')
+                for i in range(20):
+                    try:
+                        fun = names[i].text
+                        fun1 = Specication[i].text
+                        if fun == "Item EAN":
+                            # print("item EAN:" + fun1)
+                            return str(fun1)
+                    except:
+                        return "not_available"
+    else:
+        return "not_available"
+
+
+def ProductHighlights(page_soup):
+    return "NA"
+
+
+def ProductId(page_soup):
+    return "NA"
+
+
+def ProductImageUrl(page_soup):
+    image = page_soup.find('div', {'class': 'img-bucket zoom-enabled'})
+    zoom_image = page_soup.find('div', {'class': 'img-bucket'})
+    if image:
+        # print(image.img['src'])
+        return str(image.img['src'])
+
+    elif zoom_image:
+        # image_url=zoom_image.img['src']
+        # print(zoom_image.img['src'])
+        return str(zoom_image.img['src'])
+    else:
+        return "not_available"
+
+
+def ProductISBN(page_soup):
+    container1 = page_soup.find_all('div', {'id': 'specs-full'})
+    if container1:
+        for x in container1:
+            spe = x.find_all('dl', {'class': 'stats'})
+            for specfi in spe:
+                names = specfi.find_all('dt')
+                Specication = specfi.find_all('dd')
+                for i in range(20):
+                    try:
+                        fun = names[i].text
+                        fun1 = Specication[i].text
+                        if fun == "ISBN":
+                            # print("ISBN:" + fun1)
+                            return str(fun1)
+                    except:
+                        return "not_available"
+    else:
+        return "not_available"
+
+
+def ProductLikes(page_soup):
+    return "NA"
+
+
+def ProductMPN(page_soup):
+    return "NA"
+
+
+def ProductName(page_soup):
+    try:
+        product_title = page_soup.find('h1').text.strip().replace(',', '-')
+        # print(product_title)
+        return re.sub(('[^a-zA-Z0-9 .]'), '', product_title)
+    except:
+        return "not_available"
+
+
+def ProductNoOfReviews(page_soup):
+    return "NA"
+
+
+def ProductOriginalPrice(page_soup):
+    try:
+        original_price = page_soup.find('span', {'class': 'was'}).text.strip()
+        if original_price:
+            # print("Actual: " + original_price)
+            return str(original_price.replace("AED", ""))
+        else:
+            return "not_available"
+    except:
+        return "not_available"
+
+
+def Productrating(page_soup):
+    try:
+        rating = page_soup.find('div', {'class': 'rate-of-avg'}).text.strip()
+        if rating:
+            # print(rating)
+            return str(rating)
+        else:
+            return "not_available"
+    except:
+        return "not_available"
+
+
+def ProductShippingPrices(page_soup):
+    return "NA"
+
+
+def ProductSize(page_soup):
+    container1 = page_soup.find_all('div', {'id': 'specs-full'})
+    if container1:
+        for num in container1:
+            spe = num.find_all('dl', {'class': 'stats'})
+            for specfi in spe:
+                names = specfi.find_all('dt')
+                Specication = specfi.find_all('dd')
+                for i in range(24):
+                    try:
+                        fun = names[i].text
+                        fun1 = Specication[i].text
+                        if fun == "Size":
+                            # print("Size:" + fun1)
+                            return str(fun1)
+                    except:
+                        return "not_available"""
+    else:
+        return "not_available"
+
+
+def ProductSpecifications(page_soup):
+    my_dic = {}
+    i = 0
+    container1 = page_soup.find_all('div', {'id': 'specs-short'})
+    if container1:
+        for x in container1:
+            spe = x.find_all('dl', {'class': 'stats'})
+            for specfi in spe:
+                names = specfi.find_all('dt')
+                Specication = specfi.find_all('dd')
+                for i in range(20):
+                    try:
+                        fun = names[i].text
+                        fun1 = Specication[i].text
+                        my_dic[fun] = fun1
+                    except:
+                        pass
+
+        some = json.dumps(my_dic).replace(",", " ")
+        # print(some)
+        return re.sub('[^a-zA-Z0-9 .]', '', some)
+    else:
+        return "not_available"
+
+
+def ProductUPC(page_soup):
+    return "NA"
+
+
+def ProductsAvailable(page_soup):
+    return "NA"
+
+
+def ProductsSold(page_soup):
+    return "NA"
+
+
+def ProductReturnPolicies(page_soup):
+    return "NA"
+
+
+def SellerCode(page_soup):
+    return "NA"
+
+
+def SellerLocation(page_soup):
+    return "NA"
+
+
+
+def SellerName(page_soup):
+        try:
+                sold = page_soup.find('span', {'class': 'unit-seller-link'})
+                if len(sold)==0:
+                        return "not_avaliable"
+
+                else:
+                        seller = sold.text.strip().encode('utf-8')
+                        try:
+                                name = seller.split('(')
+                                return name[0]
+                        except:
+                                return seller
+        except:
+                return "not_avaliable"
+
+
+def SellerNegativeRating(page_soup):
+    return "NA"
+
+
+def SellerNeutralRating(page_soup):
+    return "NA"
+
+
+def SellerPositiveRating(page_soup):
+    return "NA"
+
+
+def SellerOverallRating(page_soup):
+    return "NA"
+
+
+def SellerRank(page_soup):
+    return "NA"
+
+
+def SellerYearOfJoining(page_soup):
+    return "NA"
+
+
+def ShippingAvailableCountries(page_soup):
+    return "NA"
+
+
+def ShippingLocation(page_soup):
+    return "NA"
+
+
+def ShippingLogisticName(page_soup):
+    return "NA"
+
+
+def ShippingPrice(page_soup):
+    return "NA"
+
+
+def ShopLocation(page_soup):
+    return "NA"
+
+
+def ShopName(page_soup):
+    return "NA"
+
+
+def ShopNoOfSales(page_soup):
+    return "NA"
+
+
+def ShopRating(page_soup):
+    return "NA"
+
+
+def TaxInformation(page_soup):
+    return "NA"
+
+
+def ProductVisibility(page_soup):
+    return "NA"
+
+
+def ProductWarranty(page_soup):
+    return "NA"
+
+
+def ProductShippingPolicies(page_soup):
+    return "NA"
+
+
+def find_if_exits(input_val):
+    if input_val:
+        if 'not_available' in input_val:
+            return 'not_available'
+        return input_val.replace('_', '')
+    else:
+        return 'not_available'
+
+
+def validate_selling_price(input_val):
+    if input_val == '.':
+        return 'not_available'
+    else:
+        return input_val
+
+
+def get_data(raw_data, hierarchy, product_url):
+    product_url = product_url
+    main_name = Name(hierarchy)
+    product = dict()
+
+    # print(hirerachy_list)
+    # product is a dictionary and used superset field names as keys and get values by your own
+    # parsing methods and assign them key values
+
+    product['sku']                            = ProductSKU(raw_data)
+    product['asin']                           = 'NA'
+    product['date']                           = ProductDate()
+    product['time']                           = ProductTime()
+    product['marketplace']                    = CONSTANTS.PROJECT_NAME
+    product['domain']                         = CONSTANTS.PROJECT_DOMAIN
+    product['category']                       = main_name[1]
+    product['category_level_1']               = main_name[2]
+    product['category_level_2']               = main_name[3]
+    product['category_level_3']               = main_name[4]
+    product['category_level_4']               = 'NA'
+    product['category_level_5']               = 'NA'
+    product['category_level_6']               = 'NA'
+    product['category_level_7']               = 'NA'
+    product['category_level_8']               = 'NA'
+    product['category_level_9']               = 'NA'
+
+    if DataCollectors_Configuration.WRITE_TO == WRITE_TO_CASSANDRA:
+        product['condition']                    = ProductCondition(raw_data)
+        product['additional_policies']          = ProductAdditionalPolicies(raw_data)
+        product['description']                  = ProductDescription(raw_data)
+        product['highlights']                   = ProductHighlights(raw_data)
+        product['rating_details']               = 'NA'
+        product['specifications']               = ProductSpecifications(raw_data)
+        product['seller_overall_rating']        = SellerOverallRating(raw_data)
+        product['seller_description']           = 'NA'
+        product['return_policies']              = ProductReturnPolicies(raw_data)
+        product['warrenty']                     = ProductWarranty(raw_data)
+        product['shipping_policies']            = ProductShippingPolicies(raw_data)
+        product['from_manufracture']            = 'NA'
+        product['promotion']                    = 'NA'
+        product['other_format_prices']          = 'NA'
+        product['seller_detailed_information']  = 'NA'
+    else:
+        product['condition']                    = json.dumps({'condition': ProductCondition(raw_data)})
+        product['additional_policies']          = json.dumps({'Additional_policies': ProductAdditionalPolicies(raw_data)})
+        product['description']                  = json.dumps({'description': ProductAdditionalPolicies(raw_data)})
+        product['highlights']                   = json.dumps({'highlights':  ProductHighlights(raw_data)})
+        product['rating_details']               = json.dumps('NA')
+        product['specifications']               = json.dumps({'specification': ProductSpecifications(raw_data)})
+        product['seller_overall_rating']        = json.dumps(SellerOverallRating(raw_data))
+        product['seller_description']           = json.dumps({'seller_description': 'NA'})
+        product['return_policies']              = json.dumps({'return_policies': ProductReturnPolicies(raw_data)})
+        product['warrenty']                     = json.dumps({'warrenty': ProductWarranty(raw_data)})
+        product['shipping_policies']            = json.dumps({'shipping_policies': ProductShippingPolicies(raw_data)})
+        product['from_manufracture']            = json.dumps({'from_manufracture': 'NA'})
+        product['promotion']                    = json.dumps({'promotion': 'NA'})
+        product['other_format_prices']          = json.dumps({'other_format_prices': 'NA'})
+        product['seller_detailed_information']  = json.dumps({'seller_detailed_information': 'NA'})
+
+    product['saved_price']                  = ProductSavedPrice(raw_data)
+    product['added_date']                   = ProductAddedDate(raw_data)
+    product['availability']                 = ProductAvailability(raw_data)
+    product['brand']                        = ProductBrand(raw_data)
+    product['discount_percentage']          = ProductDiscountPercentage(raw_data)
+    product['product_selling_price']        = validate_selling_price(ProductSellingPrice(raw_data))
+    product['product_EAN']                  = ProductEAN(raw_data)
+    product['product_id']                   = ProductId(raw_data)
+    product['image_url']                    = ProductImageUrl(raw_data)
+    product['likes']                        = ProductLikes(raw_data)
+    product['isbn']                         = ProductISBN(raw_data)
+    product['isbn-10']                      = 'NA'
+    product['isbn-13']                      = 'NA'
+    product['MPN']                          = ProductMPN(raw_data)
+    product['name']                         = ProductName(raw_data)
+    product['no_of_reviews']                = ProductNoOfReviews(raw_data)
+    product['original_price']               = ProductOriginalPrice(raw_data)
+    product['rating']                       = Productrating(raw_data)
+    product['shipping_price']               = ShippingPrice(raw_data)
+    product['size']                         = ProductSize(raw_data)
+    product['upc']                          = ProductUPC(raw_data)
+    product['url']                          = product_url
+    product['quantity_available']           = ProductsAvailable(raw_data)
+    product['products_slod']                = ProductsSold(raw_data)
+    product['seller_code']                  = SellerCode(raw_data)
+    product['seller_location']              = SellerLocation(raw_data)
+    product['seller_name']                  = SellerName(raw_data)
+    product['seller_negative_rating']       = SellerNegativeRating(raw_data)
+    product['seller_neutral_rating']        = SellerNeutralRating(raw_data)
+    product['seller_positive_rating']       = SellerPositiveRating(raw_data)
+    product['seller_rank']                  = SellerRank(raw_data)
+    product['seller_store_link']            = 'NA'
+    product['seller_year_of_joining']       = SellerYearOfJoining(raw_data)
+    product['shipping_available_countries'] = ShippingAvailableCountries(raw_data)
+    product['shipping_location']            = ShippingLocation(raw_data)
+    product['shipping_logistic_name']       = ShippingLogisticName(raw_data)
+    product['shipping_price']               = ShippingPrice(raw_data)
+    product['shop_location']                = ShopLocation(raw_data)
+    product['shop_name']                    = ShopName(raw_data)
+    product['no_of_sales']                  = ShopNoOfSales(raw_data)
+    product['shop_rating']                  = ShopRating(raw_data)
+    product['Tax_info']                     = 'NA'
+    product['Visibility']                   = 'NA'
+    product['currency']                     = 'AED'
+    product['color_variants']               = 'NA'
+    product['style_variants']               = 'NA'
+    product['author_name']                  = 'NA'
+
+    # store the data into a tuple because it will be easy to identify which feilds are missing
+
+
+    return product

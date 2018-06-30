@@ -1,0 +1,261 @@
+from general import file_to_set, list_to_file, set_to_file,write_file
+import response_getter
+import threading
+import Queue
+import DataCollectors_Configuration
+import time
+import CONSTANTS
+import path_CONSTANTS
+
+
+class Workers:
+    PRODUCTS_PAGE_URLS_QUEUE_FILE = ''
+
+    categories_queue = Queue.Queue()
+    NUMBER_OF_THREADS = DataCollectors_Configuration.NO_OF_THEARDS
+    starting_time = 0
+    ending_time = 0
+
+    def __init__(self):
+        print("starting BAGS_AND_PURSES product url collection")
+        Workers.starting_time = time.time()
+        Workers.PRODUCTS_PAGE_URLS_QUEUE_FILE = path_CONSTANTS.BAGS_AND_PURSES_QUEUE_PATH
+        self.create_workers()
+        Workers.crawl()
+
+    # Create worker threads (will die when main exits)
+    def create_workers(self):
+        for _ in range(Workers.NUMBER_OF_THREADS):
+            t = threading.Thread(target=Workers.work)
+            t.daemon = True
+            t.start()
+            time.sleep(1)
+
+    # Do the next job in the queue
+    @staticmethod
+    def work():
+        while True:
+            url = Workers.categories_queue.get()
+            # If we split it by ',' then we first item in list is hierarchy and second item in the list is
+            # product_page_url
+            url_split = url.split('|')
+            hierarchy = '|'.join(url_split[0:-1])
+            product_page_url = url_split[-1]
+            # Create object for ProductURLScrapper so that each treadh access different object
+            scrapper = ProductUrlScrapper()
+            scrapper.visit_page(threading.current_thread().name, hierarchy, product_page_url)
+            Workers.categories_queue.task_done()
+
+    # Each queued link is a new job
+    @staticmethod
+    def create_jobs():
+        # For files in the file iterate through each line and put each link into queue
+        for link in file_to_set(Workers.PRODUCTS_PAGE_URLS_QUEUE_FILE):
+            Workers.categories_queue.put(link)
+        Workers.categories_queue.join()
+        Workers.crawl()
+
+    # Check if there are items in the queue, if so crawl them
+    @staticmethod
+    def crawl():
+        queued_links = file_to_set(Workers.PRODUCTS_PAGE_URLS_QUEUE_FILE)
+        if len(queued_links) > 0:
+            # print(str(len(queued_links)) + ' links in the queue')
+            Workers.create_jobs()
+        else:
+            Workers.ending_time = time.time()
+            total_time = Workers.ending_time - Workers.starting_time
+            print('Total_time taken to collect BAGS_AND_PURSES category urls: ' + str(total_time) + 'sec')
+
+
+class ProductUrlGenerator():
+
+    @staticmethod
+    def get_product_links(hierarchy, url):
+        '''
+
+        :param hierarchy: hierarchy of category
+        :param url: product_page url is taken as input and parsed and product_urls are generated
+        :return: if urls are present list of product urls or  returns zero
+        '''
+        response = response_getter.get_content(url)
+        if response:
+            required_data_1 = response.findAll("div", {
+                "class": "js-merch-stash-check-listing block-grid-item v2-listing-card position-relative flex-xs-none "})
+            required_data_2 = response.findAll("div", {
+                "class": "js-merch-stash-check-listing block-grid-item v2-listing-card position-relative pb-xs-0 "})
+            required_data_3 = response.findAll("div", {
+                "class": "js-merch-stash-check-listing block-grid-item v2-listing-card position-relative flex-xs-none pb-xs-0 "
+            })
+
+            gather_product_link = []
+
+            if len(required_data_1) != 0:
+                for links in required_data_1:
+                    try:
+                        if links is not None:
+                            products_urls = links.find("a")['href']
+
+                            hierarchy_products_urls = '{}|{}'.format(hierarchy, products_urls)
+                            gather_product_link.append(hierarchy_products_urls)
+                    except:
+                        continue
+                return gather_product_link
+
+            elif len(required_data_2) != 0:
+                for links in required_data_2:
+                    try:
+                        if links is not None:
+                            products_urls = links.find("a")['href']
+
+                            hierarchy_products_urls = '{}|{}'.format(hierarchy, products_urls)
+                            gather_product_link.append(hierarchy_products_urls)
+                    except:
+                        continue
+                return gather_product_link
+            elif len(required_data_3) != 0:
+                for links in required_data_3:
+                    try:
+                        if links is not None:
+                            products_urls = links.find("a")['href']
+
+                            hierarchy_products_urls = '{}|{}'.format(hierarchy, products_urls)
+                            gather_product_link.append(hierarchy_products_urls)
+                    except:
+                        continue
+                return gather_product_link
+        else:
+            return 0
+
+
+def save_links(thread_name, hierarchy, product_page_url):
+    # when hierarchy is splitted whith '|' the last item in list give last page number
+    last_page = hierarchy.split('|')[-1]
+
+    completed_urls = []  # to keep Track of urls which are completed
+    skipped_urls = []  # to keep track of urls whicha are missed
+
+    for current_page in range(1, int(last_page) + 1):
+        if DataCollectors_Configuration.PRODUCT_URL_FLAG == CONSTANTS.URL_FLAG:  # collect sample urls
+            # collect sample urls number equal to mentioned in config file
+            if current_page <= DataCollectors_Configuration.NO_OF_PRODUCT_URL_TO_COLLECT:
+                url = '{}&page={}'.format(product_page_url, current_page)
+
+                # print('{} is visiting :{} '.format(thread_name, url))
+
+                product_urls = ProductUrlGenerator.get_product_links(hierarchy, url)
+            else:
+                break
+        else:
+            url = '{}&page={}'.format(product_page_url, current_page)
+
+            print('{} is visiting :{} '.format(thread_name, url))
+
+            product_urls = ProductUrlGenerator.get_product_links(hierarchy, url)
+        # if product _urls value is zero then their wrong with url so add that url to skiiped_list so that we can
+        # verify later else their is nothing wrong we can continue
+        if product_urls == 0:
+            skipped_url = '{}|{}'.format(hierarchy, url)
+            skipped_urls.append(skipped_url)
+            continue
+        else:
+            hierarchy_path = hierarchy.split('|')
+            completed_url = '{}|{}'.format(hierarchy, url)
+            completed_urls.append(completed_url)
+            full_path_queue = '{}{}{}{}{}{}{}'.format(
+                                                    DataCollectors_Configuration.ROOT_FOLDER,
+                                                    DataCollectors_Configuration.PATH_STYLE,
+                                                  DataCollectors_Configuration.ETSY_PROJECT_NAME,
+                                                  DataCollectors_Configuration.PATH_STYLE,
+                                                  DataCollectors_Configuration.PATH_STYLE.join(hierarchy_path[2:-1]),
+                                                  DataCollectors_Configuration.PATH_STYLE,
+                                                  CONSTANTS.PODUCTS_PAGE
+                                                  )
+            full_path_completed = '{}{}{}{}{}{}{}'.format(
+                                                        DataCollectors_Configuration.ROOT_FOLDER,
+                                                        DataCollectors_Configuration.PATH_STYLE,
+                                                      DataCollectors_Configuration.ETSY_PROJECT_NAME,
+                                                      DataCollectors_Configuration.PATH_STYLE,
+                                                      DataCollectors_Configuration.PATH_STYLE.join(hierarchy_path[2:-1]),
+                                                      DataCollectors_Configuration.PATH_STYLE,
+                                                      CONSTANTS.COMPLETED_PAGE
+                                                      )
+            # write the urls into file and in hierarchy format
+            if len(product_urls) !=0:
+                list_to_file(full_path_queue, product_urls)
+                write_file(full_path_completed, '')
+
+    return completed_urls, skipped_urls
+
+
+class ProductUrlScrapper:
+    # These are the files to store links and feed them to thread queue
+
+    products_page_url_queue_file = path_CONSTANTS.BAGS_AND_PURSES_QUEUE_PATH
+    products_page_url_completed_file = path_CONSTANTS.BAGS_AND_PURSES_COMPLETED_PATH
+    products_page_url_skipped_file = path_CONSTANTS.BAGS_AND_PURSES_SKIPPED_PATH
+
+    # these sets are used to store links and avoid dulicapte links
+    products_page_url_queue = set()
+    products_page_url_completed = set()
+    products_page_url_skipped = set()
+
+    def __init__(self):
+        # Intiailize the varibles
+        ProductUrlScrapper.products_page_url_queue = file_to_set(ProductUrlScrapper.products_page_url_queue_file)
+        ProductUrlScrapper.products_page_url_completed = file_to_set(ProductUrlScrapper.products_page_url_queue_file)
+        ProductUrlScrapper.products_page_url_skipped = file_to_set(ProductUrlScrapper.products_page_url_skipped_file)
+
+    # Updates  fills queue and updates files and collect urls
+    @staticmethod
+    def visit_page(thread_name, hierarchy, product_page_url):
+        if product_page_url not in ProductUrlScrapper.products_page_url_completed:
+            if product_page_url not in ProductUrlScrapper.products_page_url_skipped:
+                ProductUrlScrapper.update_links(thread_name, hierarchy, product_page_url)
+
+    # Get links and update the files
+    @staticmethod
+    def update_links(thread_name, hierarchy, product_page_url):
+        # print(thread_name + ' now visiting ' + product_page_url)
+
+        completed_links, skipped_links = save_links(thread_name, hierarchy, product_page_url)
+
+        if completed_links:
+            # if we received completed links then remove current url for queue file and update completed file
+            remove_url = '{}|{}'.format(hierarchy, product_page_url)
+            ProductUrlScrapper.products_page_url_queue.remove(remove_url)
+            ProductUrlScrapper.products_page_url_completed |= set(completed_links)
+            ProductUrlScrapper.products_page_url_skipped |= set(skipped_links)
+
+            ProductUrlScrapper.update_files(ProductUrlScrapper.products_page_url_queue,
+                                            ProductUrlScrapper.products_page_url_queue_file,
+                                            ProductUrlScrapper.products_page_url_completed,
+                                            ProductUrlScrapper.products_page_url_completed_file)
+            if skipped_links:
+                # if there are any skipped links then update those also
+                list_to_file(ProductUrlScrapper.products_page_url_skipped_file, skipped_links)
+        elif skipped_links:
+            # If there are skipped links then write it them in a file
+            remove_url = '{}|{}'.format(hierarchy, product_page_url)
+            list_to_file(ProductUrlScrapper.products_page_url_skipped_file, skipped_links)
+            ProductUrlScrapper.products_page_url_queue.remove(remove_url)
+            set_to_file(ProductUrlScrapper.products_page_url_queue_file, ProductUrlScrapper.products_page_url_queue)
+
+    @staticmethod
+    def update_files(queu, queue_file, completed, completed_file):
+
+        """
+
+        :param queu:list of urls to be updated
+        :param queue_file: path of file to updated
+        :param completed: list of urls to be updated
+        :param completed_file: path of file to ba updated
+        :return: NONE
+        """
+
+        set_to_file(queue_file, queu)
+        set_to_file(completed_file, completed)
+
+
+def start_collection():
+    Workers()

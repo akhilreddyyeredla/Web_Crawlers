@@ -1,0 +1,222 @@
+import sys
+
+sys.path.insert(0, r'/usr/datacollector')
+
+
+from product_url_collectors import antiques_url_collector, art_url_collector, baby_url_collector , books_url_collector, business_url_collector, cameras_url_collector, cell_phones_url_collector , coins_url_collector, collectibles_url_collector, computers_url_collector, consumer_electronics_url_collector , crafts_url_collector, digital_goods_url_collector, dolls_url_collector, dvds_movies_url_collector , entertainment_url_collector, everything_else_url_collector, fashion_url_collector, health_beauty_url_collector , home_garden_url_collector, jewellery_url_collector, music_url_collector, musical_instruments_url_collector , pet_supplies_url_collector, pottery_url_collector, speciality_services_url_collector, sporting_goods_url_collector , sports_mem_url_collector, stamps_url_collector, tickets_url_collector, toys_url_collector, travel_url_collector, video_games_url_collector
+from threading import Thread
+from CONSTANTS import *
+
+from DataCollectors_Configuration import BONANZA_CATEGORY_LIST, START_URL_COLLECTION, START_INFO_COLLECTION,START_HIERARCHY_COLLECTION
+
+category_list = '|'.join(BONANZA_CATEGORY_LIST)
+
+def start_url_collection():
+    jobs =[]
+    if ANTIQUES in category_list:
+        thread_1 = Thread(target=antiques_url_collector.start_url_collection)
+        thread_1.daemon = True
+        jobs.append(thread_1)
+        #thread_1.start()
+        #thread_1.join()
+    if ART in category_list:
+        thread_2 = Thread(target=art_url_collector.start_url_collection)
+        thread_2.daemon = True
+        jobs.append(thread_2)
+        #thread_1.start()
+        #thread_1.join()
+    if BABY in category_list:
+        thread_3 = Thread(target=baby_url_collector.start_url_collection)
+        thread_3.daemon = True
+        jobs.append(thread_3)
+        #thread_1.start()
+        #thread_1.join()
+    if BOOKS in category_list:
+        thread_4 = Thread(target=books_url_collector.start_url_collection)
+        thread_4.daemon = True
+        jobs.append(thread_4)
+        #thread_1.start()
+        #thread_1.join()
+    if BUSINESS in category_list:
+        thread_5 = Thread(target=business_url_collector.start_url_collection)
+        thread_5.daemon = True
+        jobs.append(thread_5)
+        #thread_1.start()
+        #thread_1.join()
+    if CAMERAS in category_list:
+        thread_6 = Thread(target=cameras_url_collector.start_url_collection)
+        thread_6.daemon = True
+        jobs.append(thread_6)
+        #thread_1.start()
+        #thread_1.join()
+    if CELL_PHONES in category_list:
+        thread_7 = Thread(target=cell_phones_url_collector.start_url_collection)
+        thread_7.daemon = True
+        jobs.append(thread_7)
+        #thread_1.start()
+        #thread_1.join()
+    if COINS in category_list:
+        thread_8 = Thread(target=coins_url_collector.start_url_collection)
+        thread_8.daemon = True
+        jobs.append(thread_8)
+        #thread_1.start()
+        #thread_1.join()
+    if COLLECTIBLES in category_list:
+        thread_9 = Thread(target=collectibles_url_collector.start_url_collection)
+        thread_9.daemon = True
+        jobs.append(thread_9)
+        #thread_1.start()
+        #thread_1.join()
+    if COMPUTERS in category_list:
+        thread_10 = Thread(target=computers_url_collector.start_url_collection)
+        thread_10.daemon = True
+        jobs.append(thread_10)
+        #thread_1.start()
+        #thread_1.join()
+    if CONSUMER_ELECTRONICS in category_list:
+        thread_11 = Thread(target=consumer_electronics_url_collector.start_url_collection)
+        thread_11.daemon = True
+        jobs.append(thread_11)
+        #thread_1.start()
+        #thread_1.join()
+    if CRAFTS in category_list:
+        thread_12 = Thread(target=crafts_url_collector.start_url_collection)
+        thread_12.daemon = True
+        jobs.append(thread_12)
+        #thread_1.start()
+        #thread_1.join()
+    if DIGITAL_GOODS in category_list:
+        thread_13 = Thread(target=digital_goods_url_collector.start_url_collection)
+        thread_13.daemon = True
+        jobs.append(thread_13)
+        #thread_1.start()
+        #thread_1.join()
+    if DOLLS in category_list:
+        thread_14 = Thread(target=dolls_url_collector.start_url_collection)
+        thread_14.daemon = True
+        jobs.append(thread_14)
+        #thread_1.start()
+        #thread_1.join()
+    if DVDS_MOVIES in category_list:
+        thread_15 = Thread(target=dvds_movies_url_collector.start_url_collection)
+        thread_15.daemon = True
+        jobs.append(thread_15)
+        #thread_1.start()
+        #thread_1.join()
+    if ENTERTAINMENT in category_list:
+        thread_16 = Thread(target=entertainment_url_collector.start_url_collection)
+        thread_16.daemon = True
+        jobs.append(thread_16)
+        #thread_1.start()
+        #thread_1.join()
+    if EVERYTHING_ELSE in category_list:
+        thread_17 = Thread(target=everything_else_url_collector.start_url_collection)
+        thread_17.daemon = True
+        jobs.append(thread_17)
+        #thread_1.start()
+        #thread_1.join()
+    if FASHION in category_list:
+        thread_18 = Thread(target=fashion_url_collector.start_url_collection)
+        thread_18.daemon = True
+        jobs.append(thread_18)
+        #thread_1.start()
+        #thread_1.join()
+    if HEALTH_BEAUTY in category_list:
+        thread_19 = Thread(target=health_beauty_url_collector.start_url_collection)
+        thread_19.daemon = True
+        jobs.append(thread_19)
+        #thread_1.start()
+        #thread_1.join()
+    if HOME_GARDEN in category_list:
+        thread_20 = Thread(target=home_garden_url_collector.start_url_collection)
+        thread_20.daemon = True
+        jobs.append(thread_20)
+        #thread_1.start()
+        #thread_1.join()
+    if JEWELLERY in category_list:
+        thread_21 = Thread(target=jewellery_url_collector.start_url_collection)
+        thread_21.daemon = True
+        jobs.append(thread_21)
+        #thread_1.start()
+        #thread_1.join()
+    if MUSIC in category_list:
+        thread_22 = Thread(target=music_url_collector.start_url_collection)
+        thread_22.daemon = True
+        jobs.append(thread_22)
+        #thread_1.start()
+        #thread_1.join()
+    if MUSICAL_INSTRUMENTS in category_list:
+        thread_23 = Thread(target=musical_instruments_url_collector.start_url_collection)
+        thread_23.daemon = True
+        jobs.append(thread_23)
+        #thread_1.start(23
+        #thread_1.join()
+    if PET_SUPPLIES in category_list:
+        thread_24 = Thread(target=pet_supplies_url_collector.start_url_collection)
+        thread_24.daemon = True
+        jobs.append(thread_24)
+        #thread_1.start()
+        #thread_1.join()
+    if POTTERY in category_list:
+        thread_25 = Thread(target=pottery_url_collector.start_url_collection)
+        thread_25.daemon = True
+        jobs.append(thread_25)
+        #thread_1.start()
+        #thread_1.join()
+    if SPECIALITY_SERVICES in category_list:
+        thread_26 = Thread(target=speciality_services_url_collector.start_url_collection)
+        thread_26.daemon = True
+        jobs.append(thread_26)
+        #thread_1.start()
+        #thread_1.join()
+    if SPORTING_GOODS in category_list:
+        thread_27 = Thread(target=sporting_goods_url_collector.start_url_collection)
+        thread_27.daemon = True
+        jobs.append(thread_27)
+        #thread_1.start()
+        #thread_1.join()
+    if SPORTS_MEM in category_list:
+        thread_28 = Thread(target=sports_mem_url_collector.start_url_collection)
+        thread_28.daemon = True
+        jobs.append(thread_28)
+        #thread_1.start()
+        #thread_1.join()
+    if STAMPS in category_list:
+        thread_29 = Thread(target=stamps_url_collector.start_url_collection)
+        thread_29.daemon = True
+        jobs.append(thread_29)
+        #thread_1.start()
+        #thread_1.join()
+    if TICKETS in category_list:
+        thread_30 = Thread(target=tickets_url_collector.start_url_collection)
+        thread_30.daemon = True
+        jobs.append(thread_30)
+        #thread_1.start()
+        #thread_1.join()
+    if TOYS in category_list:
+        thread_31 = Thread(target=toys_url_collector.start_url_collection)
+        thread_31.daemon = True
+        jobs.append(thread_31)
+        #thread_1.start()
+        #thread_1.join()
+    if TRAVEL in category_list:
+        thread_32 = Thread(target=travel_url_collector.start_url_collection)
+        thread_32.daemon = True
+        jobs.append(thread_32)
+        #thread_1.start()
+        #thread_1.join()
+    if VIDEO_GAMES in category_list:
+        thread_33 = Thread(target=video_games_url_collector.start_url_collection)
+        thread_33.daemon = True
+        jobs.append(thread_33)
+        #thread_1.start()
+        #thread_1.join()
+    for job in jobs:
+    	job.start()
+    for job in jobs:
+        if (job.is_alive()):
+		job.join()
+
+if __name__ == '__main__':
+	start_url_collection()
+

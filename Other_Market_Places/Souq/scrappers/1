@@ -1,0 +1,213 @@
+import time
+from file_operations import create_project_dir
+from file_operations import *
+import Queue
+from threading import Thread
+import file_operations
+import CONSTANTS
+import path_CONSTANTS
+import DataCollectors_Configuration
+from response_getter import get_page_soup
+
+project_name = CONSTANTS.PROJECT_NAME
+# Queue to impliment threadpool
+urls_queue = Queue.Queue()
+
+# To store File paths
+queue_file = path_CONSTANTS.Electronics_QUEUE_FILE
+completed_file = path_CONSTANTS.Electronics_COMPLETED_FILE
+skipped_file = path_CONSTANTS.Electronics_SKIPPED_FILE
+project_name_url = DataCollectors_Configuration.SOUQ_URL_ROOT_FOLDER
+project_name_info = DataCollectors_Configuration.SOUQ_INFO_ROOT_FOLDER
+# To store files data in to memory
+queue_list = file_operations.file_to_list(queue_file)
+completed_list = file_operations.file_to_list(completed_file)
+skipped_list = file_operations.file_to_list(skipped_file)
+starting_time = 0
+ending_time = 0
+
+
+# name_url = file_to_dictionary(URLS_FILE)
+
+
+# The program  Starts from here
+class Workers:
+
+    def __init__(self):
+        global starting_time
+        starting_time = time.time()
+        print("started Electronics urls collection")
+        Workers.create_workers()
+        Workers.crawl()
+
+    @staticmethod
+    # This meathod creates threadpool and target work meathod
+    def create_workers():
+        for _ in range(DataCollectors_Configuration.NO_OF_THEARDS):
+            t = Thread(target=Workers.work)
+            t.daemon = False
+            t.start()
+
+    # name_url = file_to_dictionary(urls_file)
+    @staticmethod
+    def work():
+        while True:
+            value = urls_queue.get().split('|')
+            name = '|'.join(value[0:-1])
+	    create_project_dir(project_name_info + '/' + name.replace('|', '/'))
+            create_project_dir(project_name_url + '/' + name.replace('|', '/'))
+            url = value[-1]
+
+            CollectUrls.scrapper(name, url)  # to call scrapper method which collects all products urls
+            urls_queue.task_done()
+
+    # create jobs for workers and wait till all work is finished
+    @staticmethod
+    def create_jobs():
+        for link in file_to_list(queue_file):
+            urls_queue.put(link)
+        urls_queue.join()
+        Workers.crawl()
+
+    # check if links are present in file then create jobs
+    @staticmethod
+    def crawl():
+        queued_links = file_to_list(queue_file)
+        if len(queued_links) > 0:
+            Workers.create_jobs()
+        else:
+            ending_time = time.time()
+            total_time = ending_time - starting_time
+            print('Electronics urls collected in :' + str(total_time) + ' secs')
+            # here the product urls collection is finished now start product details collection
+
+
+class CollectUrls:
+
+    @staticmethod
+    def get_product_urls(category_name, url):
+        # Getting links from the url.
+
+        out_filename = [category_name.replace('|', '/'), '{}_links.txt'.format(category_name.split('|')[-1])]
+        urls_list = []
+
+        iterator = 2  # should increment page numbers from 2 page
+
+        base_url = url
+        sent_url = url
+        file_line = '{}|{}'.format(category_name, url)
+        while True:
+
+            # Get soup object and receivied url.
+
+            page_soup, received_url = get_page_soup(sent_url)
+           
+
+            if not page_soup:
+                # is retturn value is none then the their is error in link so skip that link and continue
+                sent_url = '{}{}{}'.format(base_url, "&section=2&page=", iterator)
+                iterator = iterator + 1
+                try:
+                    queue_list.remove(file_line)
+                    skipped_list.add(file_line)
+                    CollectUrls.update_files(queue_list, queue_file, skipped_list, skipped_file)
+                    continue
+                except KeyError as e:
+                    print e
+                    print sent_url
+                    skipped_list.add(file_line)
+                    CollectUrls.update_files(queue_list, queue_file, skipped_list, skipped_file)
+                    continue
+
+
+            elif page_soup == CONSTANTS.BAD_STATUS:
+                # If page soup is bad status then ther are no pages to iterate
+                try:
+                    queue_list.remove(file_line)
+                    completed_list.add(file_line)
+                    CollectUrls.update_files(queue_list, queue_file, completed_list, completed_file)
+                    break
+                except KeyError as e:
+                    print e
+                    print sent_url
+                    completed_list.add(file_line)  # add url to completed
+                    CollectUrls.update_files(queue_list, queue_file, completed_list, completed_file)
+                    break
+
+
+
+            elif sent_url == received_url:
+                # collect sample urls
+                if DataCollectors_Configuration.PRODUCT_URL_FLAG == CONSTANTS.PRODUCT_FlAG:
+                    # collect no_of sample urls as mentioned in DataCollectors_Configuration file
+                    if iterator <= DataCollectors_Configuration.NO_OF_PRODUCT_URL_TO_COLLECT:
+                        # create next page url
+                        sent_url = '{}{}{}'.format(base_url, "&section=2&page=", iterator)
+                        iterator = iterator + 1
+                        container = page_soup.find_all('div',
+                                                       {'class': 'column column-block block-grid-large single-item'})
+
+                        # Scan the page and collect product urls
+                        for product_container in container:
+                            links = product_container.find('a')  # search for anchor tags in the html response
+                            product_url = links['href']
+
+                            urls_list.append(category_name + '|' + product_url + '\n')
+                        file_operations.dictionary_to_file(out_filename, urls_list)
+                       
+                    else:
+                        try:
+                            queue_list.remove(file_line)  # remove url present in queue
+                            completed_list.add(file_line)  # add url to completed
+                            CollectUrls.update_files(queue_list, queue_file, completed_list, completed_file)
+                            break
+                        except Exception as e:
+                            print e
+                            print sent_url
+                            completed_list.add(file_line)  # add url to completed
+                            CollectUrls.update_files(queue_list, queue_file, completed_list, completed_file)
+                            break
+                else:
+                    # create next page url
+                    sent_url = '{}{}{}'.format(base_url, "&section=2&page=", iterator)
+                    iterator = iterator + 1
+                    container = page_soup.find_all('div',
+                                                   {'class': 'column column-block block-grid-large single-item'})
+
+                    # Scan the page and collect product urls
+                    for product_container in container:
+                        links = product_container.find('a')  # search for anchor tags in the html response
+                        product_url = links['href']
+
+                        urls_list.append(category_name + '|' + product_url + '\n')
+                    file_operations.dictionary_to_file(out_filename, urls_list)
+
+
+            else:
+                try:
+                    # Write product urls to file and update files.
+                    queue_list.remove(file_line)  # remove url present in queue
+                    completed_list.add(file_line)  # add url to completed
+                    CollectUrls.update_files(queue_list, queue_file, completed_list, completed_file)
+                    break
+                except Exception as e:
+                    print e
+                    print sent_url
+                    completed_list.add(file_line)
+                    CollectUrls.update_files(queue_list, queue_file, skipped_list, skipped_file)
+                    break
+
+    # This meathod checks wheter the given link new or old if its is present in completed file then it skips
+    @staticmethod
+    def scrapper(name, url):
+        if url not in completed_list:
+            CollectUrls.get_product_urls(name, url)
+
+    @staticmethod
+    def update_files(old_list, old_file, new_list, new_file):
+        file_operations.list_to_file(old_list, old_file)
+        file_operations.list_to_file(new_list, new_file)
+
+
+def start_url_collection():
+    Workers()

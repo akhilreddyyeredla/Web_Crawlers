@@ -1,0 +1,114 @@
+##
+## Global Configurations
+##
+
+PATH_STYLE = '/'
+
+## Max number of threads you want to spwan
+NO_OF_THEARDS = 10
+
+
+## Which_part_to_collect
+
+START_HIERARCHY_COLLECTION = False
+START_URL_COLLECTION = False
+START_INFO_COLLECTION = True
+
+## Redis_output  path 
+
+REDIS_OUTPUT_PATH = '/usr/datacollector/Data_store/Souq_Product_Details_Json/{}_details.txt'
+REDIS_DELAY = 60
+
+
+## Big Query Configuration file
+
+
+
+## MySQL database configuration file
+MYSQL_USER_NAME = 'root'
+MYSQL_PASSWORD = 'root'
+MYSQL_HOST = 'localhost'
+MYSQL_DB_name = 'amazon_uk'
+
+## Cassandra database configuration file
+Cassandra_USER_NAME = 'root'
+Cassandra_PASSWORD = 'Root@123456'
+Cassandra_HOST = '35.200.145.21'
+Cassandra_DB_name = 'marketplaces'
+
+
+## Root folder where you want to save all files
+ROOT_FOLDER_BONANZA = ROOT_FOLDER + '/BONANZA'
+ROOT_FOLDER_BONANZA_HIERARCHY = ROOT_FOLDER + '/HIERARCHY'
+ROOT_FOLDER_BONANZA_URL = ROOT_FOLDER + '/URL'
+ROOT_FOLDER_BONANZA_INFO = ROOT_FOLDER + '/INFO'
+
+DEBUG = 'ON'
+
+# 1 to write into  sql_db
+# 2 to write into file
+# 3 to write into cassandra
+# 4 to write into multiple file
+# 5 to write into BigQuery
+# 6 to write into kafka
+# 7 to write into redis
+WRITE_TO = 7
+
+# Flag is used to collect sample data or all data
+# 1 to collect sample data
+# 2 to collect all the data
+
+PRODUCT_INFO_FLAG = 2
+PRODUCT_URL_FLAG = 2
+
+## No of sample products you want to collect
+NO_OF_PRODUCT_INFO_TO_COLLECT = 2
+
+## No of product urls tou want to collect for each sub_sub_category
+NO_OF_PRODUCT_URL_TO_COLLECT = 2
+
+## this pattern is used to find all the text files mathching with that path
+PATTERN_1 = '*_page_links.txt'
+PATTERN_2 = '*_page_completed.txt'
+PATTERN_3 = '*_info_links.txt'
+PATTERN_4 = '*_info_completed.txt'
+SOUQ_PATTERN = '*_links.txt'
+
+# Proxy_on is a controller which controls the usage of proxy if
+# True then it will send request through proxy if flase it will send through our ip address
+
+PROXY_ON = False 
+
+##
+## Project / Data Collector specific configurations
+##
+URL_SUFFIX = '&q[gallery_style]=1&q[page]=1&q[per_page]=48&q[sort_by]=relevancy'
+
+MAX_RETRIES = 2
+
+BONANZA_MAIN_URL = "https://www.Bonanza.com/booths/browse_categories"
+
+BONANZA_PROJECT_NAME = 'Bonanza_test_3'
+
+DOMAIN_NAME = 'https://www.Bonanza.com'
+
+'''
+ CATEGORY_LIST = ['antiques','art','baby','books','business','cameras','cell_phones',\
+ 'coins','collectibles','computers','consumer_electronics','crafts',\
+ 'digital_goods','dolls','dvds_movies','entertainment','everything_else',\
+ 'fashion','health_beauty','home_garden','jewellery','music','musical_instruments',\
+ 'pet_supplies','pottery','speciality_services','sporting_goods','sports_mem',\
+ 'stamps','tickets','toys','travel','video_games']
+'''
+
+BONANZA_CATEGORY_LIST = ['antiques','art','baby','books','business',\
+'cameras','cell_phones', 'coins','collectibles','computers',\
+'consumer_electronics','crafts', 'digital_goods','dolls','dvds_movies',\
+'entertainment','everything_else', 'fashion','health_beauty','home_garden',\
+'jewellery','music','musical_instruments', 'pet_supplies','pottery',\
+'speciality_services','sporting_goods','sports_mem', 'stamps','tickets',\
+'toys','travel','video_games']
+
+
+BONANZA_PATTERN_3 = '*_url_link.txt'
+BONANZA_PATTERN_4 = '*_url_completed.txt'

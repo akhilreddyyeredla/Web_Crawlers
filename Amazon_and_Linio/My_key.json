@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "gold-freedom-198505",
+  "private_key_id": "a2e89de4b3ec7eba33e2bf92b6570958bb3f4e8c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCzrDMJ+u4VFFJT\nbq2p9hjp3uhxmSw93vhKlg/a2oMs3WMQ9hActx9xtNkc9x7h7/uXffIMbol5/MGd\no4qy439cLO2FsJzXFTwMyGnXM8c5q4HA03ZzfBGTkMr5Bq897h6XLWyuiTm46CT+\nyut3z1+ZhEWQu/yPmwZlJYylszG77BUPGT3qkChZG1lfWmwQtruOvhmk9KynHZi8\ns1Tnehrkr5e0Eft4Ur3l1K2Z0+E9FtxJtYO3hZVMjPT4PNQEwZQIgbgX6O6gCf3E\nDHFXcpVgcdJM8Rnc1H3WpFw41LJo22M3S03CSfeM5SMaTStHdfKBsUm96ZSyHV50\n8xHFC4YhAgMBAAECggEAF43SDRNjxcipuD1Qr/DOuE4cG9RQO/Ywh5qfjnnJ64ZE\nV/NiDlmlWiMyuTzeRBFRYr1Ej4OoKyFLAo7vfl8bkapkIvwRu5KRkj1tvqQPkIxe\n0LgIFcCkjztSmI3bSFugkAII9uKPeiGYw/w3HThG2JnCAuTaCbtxfa4L/6b7tJ5Y\nhILfo7tBZFX9eMNxaOL2PtITEn5M4pv6M3JWonVNmY4jLXwPWqCtezIOzRF60pMq\n0DjEHjtklOqdqJsv2BZGAMMNS0GnJ3qE/DRTUCx89tAp+Ybqiwl/pJnreg1uT1+t\nMshS4v96MwBi4wf+c5Fn/M7/agTUbmsDErf55K00HwKBgQDob49g/Am8/G2GlsXB\nIbod022DeoWFNT7xEweOrxsjkIQwb4LLlSIQGWjWe4roOFSBbjhuBvLhcb4TqXSj\nbAGR2VrENDa83pPKZ+IL5PHM6JrfMQ1yDaFZX+DiQWDdsAXL2Ni9Swu/fs0JPCYB\nQuJPh3PLU+q4asU0OG91apxS3wKBgQDF40Ulmm0tgD6/DOhVDJBj0CIfHDmRZ74u\nldrZ2PaSLCzP0kvKkos+SZT5mr0BTO11nkiOvVsIWXgFGiKvOa32vbqI+BBXHfnU\nWJDaNNgkuag8BCjIPqOPjQy+omZlim0Tl+kAfhXiDAVNctuhKK4Mx6VBPZN1hEfd\nyRv5TNRG/wKBgQCl2Bu8fnjQUGgxlNiLAe6TI21LV5t3PVOonQRSaVx61r2K9bWk\nXsdMJ2UnTEUDhlW9eBBpaSnZc9fEna8sf37rOuPJhNvdjQ50aATgqb1hkEIYqB5I\n17LdW0zRAwcDhnnMRe/3uFksjGPth+4yDi/9wM79L+YVKZGFvhLA+42IjwKBgA1/\nQNodvFCcLKtvP/F9F+QW8BzbGfoW71vSEMlHCRpTNQM/vrekYybuceDMcxPBoXii\nQSSrOahKIeuHKtJ0xq7Lpgttj//BJaccG1UmwY9Psm/VgMqXqyRBZJskDIPkeygY\n9mV4NBnk4/+yU9ScJ7LrcxQOFR6w1Q4Fh4jrepcVAoGAQlF9CVTe0hPYZjj2z/0/\nEcutfQySuPwUWeCUGQqyxPON8cxC1lLblbroxm8QX1Q+xunJc0gU5uHMxq42aYDZ\nSLjdINH6oc6vCl2iLBAYh31c99+bAtuBau4/1uGYa1kScGFtwxeNjAiaAgGr7u5M\navkfWFc2ehI/CpjzihWlvrg=\n-----END PRIVATE KEY-----\n",
+  "client_email": "pavan-key@gold-freedom-198505.iam.gserviceaccount.com",
+  "client_id": "109386496642841624847",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pavan-key%40gold-freedom-198505.iam.gserviceaccount.com"
+}
